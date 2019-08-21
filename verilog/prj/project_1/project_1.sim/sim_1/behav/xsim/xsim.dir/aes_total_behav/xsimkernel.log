@@ -1,4 +1,0 @@
-Running: xsim.dir/aes_total_behav/xsimk -simmode gui -wdb aes_total_behav.wdb -simrunnum 0 -socket 48388
-Design successfully loaded
-Design Loading Memory Usage: 43020 KB (Peak: 43020 KB)
-Design Loading CPU Usage: 10 ms
