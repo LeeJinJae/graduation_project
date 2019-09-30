@@ -2,7 +2,7 @@
 `define C_S_AXI_ADDR_WIDTH 7
 `define IDX(x) 32*(x+1)-1:32*x
 
-module aes_axi (
+module sha_axi (
 	////////////////////////////////////////////////////////////////////////////
 	// System Signals
 	input wire                             S_AXI_ACLK,
@@ -51,7 +51,7 @@ module aes_axi (
 	 endfunction
 
 	 localparam integer ADDR_LSB = clogb2(`C_S_AXI_DATA_WIDTH/8)-1;
-	 localparam integer ADDR_MSB = `C_S_AXI_ADDR_WIDTH;
+	 localparam integer ADDR_MSB = 8;//`C_S_AXI_ADDR_WIDTH;
 
 	 // AXI4 Lite internal signals
 	 reg [1 :0]         axi_rresp;
@@ -67,27 +67,27 @@ module aes_axi (
 
 	 // Slave register
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg0;   // mode,ready,hash_ready
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg1;   // msg_len
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg1;   // msg_len  4
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg2;
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg3;
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg4;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg5;   //msg_in
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg6;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg7;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg8;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg9;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg10;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg11;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg12;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg13;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg14;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg15;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg16;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg17;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg18;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg19;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg20;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg21;
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg5;   //msg_in    14
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg6;   //            18
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg7;   //            1c
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg8;   //             20
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg9;   //            24 
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg10;  //        28
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg11;  //    2c
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg12;  // 30
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg13;  // 34
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg14;  //  38
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg15;  // 3c
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg16;  // 40 
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg17;  // 44
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg18;  // 48
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg19;  // 4c
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg20;  // 50
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg21;  //  54  
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg22;
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg23;
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg24;
@@ -103,7 +103,7 @@ module aes_axi (
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg34;
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg35;
 	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg36;
-	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg37;
+	 reg [`C_S_AXI_DATA_WIDTH-1:0] slv_reg37; //
 
 	 // Slave register read enable
 	 wire                          slv_reg_rden;
@@ -642,4 +642,4 @@ module aes_axi (
                    .msg_len             (msg_len[127:0]),
                    .mode                (mode));
 
-endmodule // aes_axi
+endmodule // sha_axi
