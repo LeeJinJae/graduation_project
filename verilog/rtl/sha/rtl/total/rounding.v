@@ -38,7 +38,7 @@ module rounding (/*AUTOARG*/
    assign h_fin = mode? (H_in[63 :  0]+hash_out[63 :  0]):({32'h0,(H_in[ 31:  0]+hash_out[ 31:  0])});
    assign hash_fin = mode? {a_fin,b_fin,c_fin,d_fin,e_fin,f_fin,g_fin,h_fin}:{256'h0,a_fin[31:0],b_fin[31:0],c_fin[31:0],d_fin[31:0],e_fin[31:0],f_fin[31:0],g_fin[31:0],h_fin[31:0]};
 
-   roundFunction roundFunction(/*AUTOINST*/
+   h_roundFunction h_roundFunction(/*AUTOINST*/
                                // Outputs
                                .h_out           (hash_out[511:0]),
                                // Inputs

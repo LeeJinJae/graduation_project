@@ -27,7 +27,7 @@ module hashing (/*AUTOARG*/
    
    reg    [511:0] routing;
 
-   cu cu(/*AUTOINST*/
+   h_cu h_cu(/*AUTOINST*/
          // Outputs
          .init                          (init),
          .enable                        (enable),

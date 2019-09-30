@@ -25,6 +25,8 @@ module sha_top (/*AUTOARG*/
    wire [127:0]   pad_count;
    wire [127:0]   zero_count;
    wire [511:0]  hash_fin;
+   wire [1023:0] msg;
+   wire [1023:0] one;
 
    reg [10:0]    i;
    reg [10:0]    j;
@@ -34,10 +36,15 @@ module sha_top (/*AUTOARG*/
    reg [383:0]   hash_code;
    reg           n_paded;
    reg [511:0]   H_in;
+   reg           last_run;
 
    localparam H0_256 = 256'h6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19;
    localparam H0_384 = 512'hcbbb9d5dc1059ed8629a292a367cd5079159015a3070dd17152fecd8f70e593967332667ffc00b318eb44a8768581511db0c2e0d64f98fa747b5481dbefa4fa4;
-
+   localparam one_mask = 1024'h1;
+   localparam mask = ~(1024'h0);
+   
+   assign msg = mode? msg_in&(mask<<(128'd1024-len_count[127:3])):msg_in&(mask<<(128'd512-len_count[127:3]));
+   assign one = mode? msg|(one_mask<<(128'd1024-len_count-128'h1)):msg|(one_mask<<(128'd512-len_count-128'h1)); // bit unit
    assign next_len_count = mode? ((len_count<128'd1024)? 128'h0:len_count - 128'd1024):((len_count<128'd512)? 128'h0 : len_count - 128'd512);
    assign pad_count = mode? (128'd1024 - len_count - 128'h1):(128'd512 - len_count - 128'h1);
    assign zero_count = pad_count - 128'h1;
@@ -51,7 +58,7 @@ module sha_top (/*AUTOARG*/
                    .clk                 (clk),
                    .rst_n               (rst_n),
                    .mode                (mode),
-                   .run                 (init|(run&(!ready))|(!n_paded)),
+                   .run                 (init|(run&(!ready))|last_run),
                    .H_in                (H_in[511:0]));
    sha_cu cu(/*AUTOINST*/
              // Outputs
@@ -81,6 +88,26 @@ module sha_top (/*AUTOARG*/
          end
       end
    end
+   
+   always @ (posedge clk or negedge rst_n) begin
+      if(!rst_n) begin
+         last_run <= 0;
+      end else begin
+         if(mode) begin
+           if(len_count > 128'd895 && len_count < 128'd1025) begin
+              last_run <= 1;
+           end else if(len_count == 0) begin
+              last_run <= 0;
+           end
+         end else begin
+           if(len_count > 128'd447 && len_count < 128'd513) begin
+            last_run <= 1;
+           end else if(len_count == 0) begin
+            last_run <= 0;
+           end
+         end
+      end
+   end            
 
    always @ (posedge clk or negedge rst_n) begin
       if(!rst_n) begin
@@ -99,10 +126,14 @@ module sha_top (/*AUTOARG*/
    end
 
    always @(posedge clk or negedge rst_n) begin
-     if(hash_done) begin
-        len_count <= next_len_count;
-     end else if((!hash)&run) begin
-        len_count <= msg_len;
+     if(!rst_n) begin
+        len_count <= 128'h0;
+     end else begin   
+         if(hash_done) begin
+            len_count <= next_len_count;
+         end else if((!hash)&run) begin
+            len_count <= msg_len;
+         end
      end
    end // always @ (posedge clk or negedge rst_n)
 
@@ -112,58 +143,36 @@ module sha_top (/*AUTOARG*/
       end else begin
          if(mode) begin
             if(hash_ready&(!ready)) begin
-               if(len_count < 128'd896) begin
-                  for(i=1023;i>pad_count;i=i-1) begin
-                     M[i] <= msg_in[i];
-                  end
-                  M[pad_count] <= 1'b1;
-                  for(j=zero_count;j>127;j=j-1) begin
-                     M[j] <= 1'b0;
-                  end
-                  M[127:0] <= msg_len;
-               end else if(len_count < 128'd1024) begin
-                  for(i=1023;i>pad_count;i=i-1) begin
-                     M[i] <= msg_in[i];
-                  end
-                  M[pad_count] <= 1'b1;
-                  for(j=zero_count;j>=0;j=j-1) begin
-                     M[j] <= 1'b0;
-                  end
+               if(msg_len[127:0] == 0) begin
+                M <= {1'b1,1023'h0};              
                end else if(len_count == 128'h0) begin
-                  if(n_paded) begin
-                     M <= {896'h0,msg_len};
-                  end else begin
-                     M <= {1'b1,895'h0,msg_len};
-                  end
+                   if(n_paded) begin
+                      M <= {896'h0,msg_len};
+                   end else begin
+                      M <= {1'b1,895'h0,msg_len};
+                   end            
+               end else if(len_count < 128'd896) begin
+                  M[1023:0] <= {one[1023:128],msg_len};
+               end else if(len_count < 128'd1024) begin
+                  M[1023:0] <= one[1023:0];
                end else begin
                   M <= msg_in;
                end
             end
          end else begin
             if(hash_ready&(!ready)) begin
-               if(len_count < 128'd448) begin
-                  for(i=511;i>pad_count;i=i-1) begin
-                     M[i] <= msg_in[i];
-                  end
-                  M[pad_count] <= 1'b1;
-                  for(j=zero_count;j>63;j=j-1) begin
-                     M[j] <= 1'b0;
-                  end
-                  M[63:0] <= msg_len;
-               end else if(len_count < 128'd512) begin
-                  for(i=511;i>pad_count;i=i-1) begin
-                     M[i] <= msg_in[i];
-                  end
-                  M[pad_count] <= 1'b1;
-                  for(j=zero_count;j>=0;j=j-1) begin
-                     M[j] <= 1'b0;
-                  end
+               if(msg_len[127:0] == 0) begin
+                   M <= {512'h0,1'b1,511'h0};                   
                end else if(len_count == 128'h0) begin
-                  if(n_paded) begin
-                     M <= {960'h0,msg_len};
-                  end else begin
-                     M <= {512'h0,1'b1,447'h0,msg_len};
-                  end
+                   if(n_paded) begin
+                      M <= {960'h0,msg_len[63:0]};
+                   end else begin
+                      M <= {512'h0,1'b1,447'h0,msg_len[63:0]};
+                   end            
+               end else if(len_count < 128'd448) begin
+                  M[1023:0] <= {one[1023:64],msg_len[63:0]};
+               end else if(len_count < 128'd512) begin
+                  M[1023:0] <= one[1023:0];
                end else begin
                   M <= msg_in;
                end
