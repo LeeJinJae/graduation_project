@@ -1,0 +1,10 @@
+openvpn bridging
+
+-server
+1. 서버에서 ./bridge-start.sh 를 통하여 인터페이스 개방
+2. openvpn server.conf 를 통하여 vpn 연결
+3. dhcpd를 통하여 해당 인터페이스에 ip 할당
+
+-client
+1. openvpn client.conf를 통하여 vpn 연결
+2. ./bridge-start를 통하여 이더넷 브릿징
