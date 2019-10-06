@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Openvpn Server's configuration
+eth="ens33"
+eth_ip="192.168.100.1"
+eth_netmask="255.255.255.0"
+#eth_broadcast="192.168.100.255"
+eth_gateway="192.168.100.1"
+
+# Define list of TAP interfaces
+tap="tap0"
